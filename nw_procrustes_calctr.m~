@@ -1,0 +1,38 @@
+function dat_trans=nw_procrustes_calctr(cfg, targetavg, sourceavg)
+%Convenience function to obtain linear transformation data to align MEG
+%data from a "source"-participant to a "target"-participant (latter could
+%also be a grand average).
+%
+%Rationale the transformation information is done using averages or mTRFs
+%contained in a *.avg field. The transformation information can be used in
+%a separate functio
+%
+%Input:
+%       -cfg.scale = per default false (i.e. scaling component = 1)
+% 
+%Output: dat_trans structure with following fields
+%       - cfg.dataP = 
+%       
+%
+
+cfg.scale = ft_getopt(cfg, 'scale', false, 1);
+
+
+if istrue(cfg.scale)
+    [d,tmp,tr] = procrustes(targetavg.avg', sourceavg.avg', 'scaling', true);    
+elseif ~istrue(cfg.scale)
+    [d,tmp,tr] = procrustes(targetavg.avg', sourceavg.avg', 'scaling', false);
+end
+
+sourceavg=rmfield(sourceavg, 'grad');
+
+dat_trans=[];
+dat_trans.dataP=sourceavg;
+dat_trans.dataP.avg=tmp';
+dat_trans.targetgrad=targetavg.grad;
+dat_trans.d=d;
+dat_trans.tr=tr;
+dat_trans.tr.c=mean(tr.c);
+
+
+
